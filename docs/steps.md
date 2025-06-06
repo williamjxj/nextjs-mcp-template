@@ -13,3 +13,5 @@ $ npx create-next-app@latest --tailwind --eslint --empty nextjs-mcp-template
 2. add editorconfig, prettier, eslint, markdownlint stuff
 use context7
 ```
+
+- `NEXTAUTH_SECRET=$(openssl rand -base64 32)`
