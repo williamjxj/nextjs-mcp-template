@@ -1,4 +1,6 @@
 import { auth, signIn, signOut } from "@/auth"
+import { providerMap } from "@/lib/providers"
+import Image from "next/image"
 
 export default async function Home() {
   const session = await auth()
@@ -15,9 +17,11 @@ export default async function Home() {
               Hello, {session.user.name || session.user.email}!
             </p>
             {session.user.image && (
-              <img
+              <Image
                 src={session.user.image}
                 alt="Profile"
+                width={64}
+                height={64}
                 className="w-16 h-16 rounded-full mx-auto mb-4"
               />
             )}
@@ -31,7 +35,7 @@ export default async function Home() {
           >
             <button
               type="submit"
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200"
             >
               Sign Out
             </button>
@@ -48,32 +52,25 @@ export default async function Home() {
           Welcome to Next.js with Auth.js!
         </h1>
         <p className="text-lg mb-8">Please sign in to continue</p>
-        <form
-          action={async () => {
-            "use server"
-            await signIn("github")
-          }}
-        >
-          <button
-            type="submit"
-            className="bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded mr-4"
-          >
-            Sign in with GitHub
-          </button>
-        </form>
-        <form
-          action={async () => {
-            "use server"
-            await signIn("google")
-          }}
-        >
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-          >
-            Sign in with Google
-          </button>
-        </form>
+        <div className="space-y-4 max-w-sm mx-auto">
+          {providerMap.map(provider => (
+            <form
+              key={provider.id}
+              action={async () => {
+                "use server"
+                await signIn(provider.id)
+              }}
+            >
+              <button
+                type="submit"
+                className={`w-full ${provider.color} text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2`}
+              >
+                <span className="text-lg">{provider.icon}</span>
+                <span>Sign in with {provider.name}</span>
+              </button>
+            </form>
+          ))}
+        </div>
       </div>
     </main>
   )

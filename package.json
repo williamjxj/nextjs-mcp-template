@@ -1,6 +1,6 @@
 {
-  "name": "nextjs-template",
-  "version": "0.1.0",
+  "name": "nextjs-mcp-template",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
