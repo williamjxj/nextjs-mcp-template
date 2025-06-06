@@ -1,9 +1,14 @@
-import { auth, signIn, signOut } from "@/auth"
-import { providerMap } from "@/lib/providers"
+import { auth, signOut } from "@/auth"
+import AuthForm from "@/components/AuthForm"
+import { credentialsSignIn, oauthSignIn } from "@/lib/auth-actions"
 import Image from "next/image"
 
-export default async function Home() {
+export default async function Home({ searchParams }) {
   const session = await auth()
+  const resolvedSearchParams = await searchParams
+  const error = resolvedSearchParams?.error
+    ? decodeURIComponent(resolvedSearchParams.error)
+    : null
 
   if (session?.user) {
     return (
@@ -46,32 +51,12 @@ export default async function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-8">
-          Welcome to Next.js with Auth.js!
-        </h1>
-        <p className="text-lg mb-8">Please sign in to continue</p>
-        <div className="space-y-4 max-w-sm mx-auto">
-          {providerMap.map(provider => (
-            <form
-              key={provider.id}
-              action={async () => {
-                "use server"
-                await signIn(provider.id)
-              }}
-            >
-              <button
-                type="submit"
-                className={`w-full ${provider.color} text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2`}
-              >
-                <span className="text-lg">{provider.icon}</span>
-                <span>Sign in with {provider.name}</span>
-              </button>
-            </form>
-          ))}
-        </div>
-      </div>
+    <main className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <AuthForm
+        credentialsSignIn={credentialsSignIn}
+        oauthSignIn={oauthSignIn}
+        error={error}
+      />
     </main>
   )
 }
