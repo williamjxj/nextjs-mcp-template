@@ -1,5 +1,5 @@
-import { auth, signOut } from "@/auth"
 import AuthForm from "@/components/AuthForm"
+import { auth, signOut } from "@/lib/auth"
 import { credentialsSignIn, oauthSignIn } from "@/lib/auth-actions"
 import Image from "next/image"
 

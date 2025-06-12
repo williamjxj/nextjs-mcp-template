@@ -1,6 +1,6 @@
 "use server"
 
-import { signIn } from "@/auth"
+import { signIn } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
 export async function credentialsSignIn(formData) {
@@ -12,17 +12,14 @@ export async function credentialsSignIn(formData) {
     })
 
     if (result?.error) {
-      // Authentication failed
       const errorMessage = encodeURIComponent(
         "Invalid email or password. Please check your credentials and try again."
       )
       redirect(`/?error=${errorMessage}`)
     } else {
-      // Authentication successful
       redirect("/")
     }
   } catch {
-    // Handle any other errors
     const errorMessage = encodeURIComponent(
       "Invalid email or password. Please check your credentials and try again."
     )
@@ -32,18 +29,9 @@ export async function credentialsSignIn(formData) {
 
 export async function oauthSignIn(providerId) {
   try {
-    const result = await signIn(providerId, {
-      redirect: false,
+    await signIn(providerId, {
+      redirectTo: "/",
     })
-
-    if (result?.error) {
-      const errorMessage = encodeURIComponent(
-        "Authentication failed. Please try again."
-      )
-      redirect(`/?error=${errorMessage}`)
-    } else {
-      redirect("/")
-    }
   } catch {
     const errorMessage = encodeURIComponent(
       "Authentication failed. Please try again."
