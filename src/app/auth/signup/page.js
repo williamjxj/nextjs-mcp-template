@@ -1,7 +1,6 @@
-import SignInForm from "@/components/SignInForm"
+import SignUpForm from "@/components/SignUpForm"
 import { auth } from "@/lib/auth"
 import {
-  credentialsSignIn,
   facebookSignIn,
   githubSignIn,
   googleSignIn,
@@ -10,7 +9,7 @@ import {
 } from "@/lib/auth-actions"
 import { redirect } from "next/navigation"
 
-export default async function SignInPage({ searchParams }) {
+export default async function SignUpPage({ searchParams }) {
   // If already signed in, redirect to home
   const session = await auth()
   if (session?.user) {
@@ -24,8 +23,7 @@ export default async function SignInPage({ searchParams }) {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <SignInForm
-        credentialsSignIn={credentialsSignIn}
+      <SignUpForm
         oauthActions={{
           github: githubSignIn,
           google: googleSignIn,

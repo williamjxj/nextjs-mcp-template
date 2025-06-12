@@ -1,6 +1,13 @@
-import AuthForm from "@/components/AuthForm"
+import SignInForm from "@/components/SignInForm"
 import { auth, signOut } from "@/lib/auth"
-import { credentialsSignIn, oauthSignIn } from "@/lib/auth-actions"
+import {
+  credentialsSignIn,
+  facebookSignIn,
+  githubSignIn,
+  googleSignIn,
+  microsoftSignIn,
+  twitterSignIn,
+} from "@/lib/auth-actions"
 import Image from "next/image"
 
 export default async function Home({ searchParams }) {
@@ -52,9 +59,15 @@ export default async function Home({ searchParams }) {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <AuthForm
+      <SignInForm
         credentialsSignIn={credentialsSignIn}
-        oauthSignIn={oauthSignIn}
+        oauthActions={{
+          github: githubSignIn,
+          google: googleSignIn,
+          facebook: facebookSignIn,
+          "microsoft-entra-id": microsoftSignIn,
+          twitter: twitterSignIn,
+        }}
         error={error}
       />
     </main>

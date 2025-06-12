@@ -15,7 +15,7 @@ export async function credentialsSignIn(formData) {
       const errorMessage = encodeURIComponent(
         "Invalid email or password. Please check your credentials and try again."
       )
-      redirect(`/?error=${errorMessage}`)
+      redirect(`/auth/signin?error=${errorMessage}`)
     } else {
       redirect("/")
     }
@@ -23,19 +23,32 @@ export async function credentialsSignIn(formData) {
     const errorMessage = encodeURIComponent(
       "Invalid email or password. Please check your credentials and try again."
     )
-    redirect(`/?error=${errorMessage}`)
+    redirect(`/auth/signin?error=${errorMessage}`)
   }
 }
 
-export async function oauthSignIn(providerId) {
-  try {
-    await signIn(providerId, {
-      redirectTo: "/",
-    })
-  } catch {
-    const errorMessage = encodeURIComponent(
-      "Authentication failed. Please try again."
-    )
-    redirect(`/?error=${errorMessage}`)
-  }
+// Individual OAuth provider actions
+export async function githubSignIn() {
+  "use server"
+  await signIn("github", { redirectTo: "/" })
+}
+
+export async function googleSignIn() {
+  "use server"
+  await signIn("google", { redirectTo: "/" })
+}
+
+export async function facebookSignIn() {
+  "use server"
+  await signIn("facebook", { redirectTo: "/" })
+}
+
+export async function microsoftSignIn() {
+  "use server"
+  await signIn("microsoft-entra-id", { redirectTo: "/" })
+}
+
+export async function twitterSignIn() {
+  "use server"
+  await signIn("twitter", { redirectTo: "/" })
 }
