@@ -34,7 +34,7 @@ use context7
 
 **Documentation:** See `auth-credentials-setup.md` for detailed setup instructions.
 
-### 4. supbase adapter
+### 4. supabase adapter
 
 ### 5. vercel deployment
 
