@@ -1,6 +1,7 @@
 import SignUpForm from "@/components/SignUpForm"
 import { auth } from "@/lib/auth"
 import {
+  credentialsSignUp,
   facebookSignIn,
   githubSignIn,
   googleSignIn,
@@ -56,6 +57,7 @@ export default async function SignUpPage({ searchParams }) {
       {/* Right Side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
         <SignUpForm
+          credentialsSignUp={credentialsSignUp}
           oauthActions={{
             github: githubSignIn,
             google: googleSignIn,

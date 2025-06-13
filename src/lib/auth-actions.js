@@ -1,6 +1,7 @@
 "use server"
 
 import { signIn } from "@/lib/auth"
+import { createUser } from "@/lib/user-service"
 import { redirect } from "next/navigation"
 
 export async function credentialsSignIn(formData) {
@@ -24,6 +25,59 @@ export async function credentialsSignIn(formData) {
       "Invalid email or password. Please check your credentials and try again."
     )
     redirect(`/auth/signin?error=${errorMessage}`)
+  }
+}
+
+/**
+ * Handle user registration with credentials
+ */
+export async function credentialsSignUp(formData) {
+  try {
+    const email = formData.get("email")
+    const password = formData.get("password")
+    const name = formData.get("name")
+
+    // Validate input
+    if (!email || !password) {
+      const errorMessage = encodeURIComponent(
+        "Email and password are required."
+      )
+      redirect(`/auth/signup?error=${errorMessage}`)
+      return
+    }
+
+    if (password.length < 6) {
+      const errorMessage = encodeURIComponent(
+        "Password must be at least 6 characters long."
+      )
+      redirect(`/auth/signup?error=${errorMessage}`)
+      return
+    }
+
+    // Create user
+    await createUser({
+      email,
+      password,
+      name: name || null,
+    })
+
+    // Auto sign in after successful registration
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/",
+    })
+  } catch (error) {
+    // Log error for debugging in development
+    if (process.env.NODE_ENV === "development") {
+      console.error("Sign up error:", error)
+    }
+    const errorMessage = encodeURIComponent(
+      error.message === "User with this email already exists"
+        ? "An account with this email already exists. Please sign in instead."
+        : "Failed to create account. Please try again."
+    )
+    redirect(`/auth/signup?error=${errorMessage}`)
   }
 }
 
