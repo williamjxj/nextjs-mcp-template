@@ -1,11 +1,19 @@
-# Next.js Template with Auth.js
+# Next.js Template with Complete Authentication
 
-A modern Next.js template with Auth.js (NextAuth.js v5), Tailwind CSS, TypeScript support, and comprehensive development tooling.
+A modern Next.js template with complete authentication system including email/password and OAuth providers, PostgreSQL database, and comprehensive development tooling.
 
-## Features
+## ✨ Features
 
 - ⚡ **Next.js 15** with App Router and Turbopack
-- 🔐 **Auth.js (NextAuth.js v5)** for authentication
+- 🔐 **Complete Authentication System**:
+  - Email/Password authentication with bcrypt
+  - OAuth providers (GitHub, Google, Microsoft)
+  - JWT sessions with NextAuth.js v5
+  - Account linking and user management
+- 🗄️ **Database Integration**:
+  - PostgreSQL with Prisma ORM
+  - User, Account, and Session models
+  - Automatic migrations and type safety
 - 🎨 **Tailwind CSS 4** for styling
 - 📝 **TypeScript** support with proper configuration
 - 🔍 **ESLint** with Next.js and Prettier integration
@@ -27,18 +35,29 @@ A modern Next.js template with Auth.js (NextAuth.js v5), Tailwind CSS, TypeScrip
    cp .env.local.example .env.local
    ```
 
-   Fill in your OAuth provider credentials in `.env.local`:
+   Fill in your configuration in `.env.local`:
 
-   - GitHub: Get from [GitHub Developer Settings](https://github.com/settings/developers)
-   - Google: Get from [Google Cloud Console](https://console.cloud.google.com/)
+   - Database connection string
+   - AUTH_SECRET (generate with `openssl rand -base64 32`)
+   - OAuth provider credentials (optional)
 
-3. **Start the development server:**
+3. **Set up the database:**
+
+   ```bash
+   # Generate Prisma client
+   npx prisma generate
+
+   # Apply database schema
+   npx prisma db push
+   ```
+
+4. **Start the development server:**
 
    ```bash
    npm run dev
    ```
 
-4. **Open [http://localhost:3000](http://localhost:3000)** in your browser
+5. **Open [http://localhost:8000](http://localhost:8000)** in your browser
 
 ## Available Scripts
 
@@ -51,48 +70,66 @@ A modern Next.js template with Auth.js (NextAuth.js v5), Tailwind CSS, TypeScrip
 - `npm run format:check` - Check if code is formatted
 - `npm run type-check` - Run TypeScript type checking
 
-## Authentication Setup
+## 🔐 Authentication System
 
-This template uses Auth.js (NextAuth.js v5) with support for:
+This template includes a complete authentication system with:
+
+### **Email/Password Authentication**
+
+- Secure user registration and login
+- Password hashing with bcrypt
+- Input validation and error handling
+- Automatic account linking
+
+### **OAuth Providers**
 
 - GitHub OAuth
 - Google OAuth
+- Microsoft OAuth
 - Extensible to other providers
 
-### OAuth Provider Setup
+### **Database Integration**
 
-#### GitHub
+- PostgreSQL database with Prisma ORM
+- User, Account, and Session models
+- Automatic migrations and type safety
 
-1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
-2. Create a new OAuth App
-3. Set Authorization callback URL to: `http://localhost:3000/api/auth/callback/github`
-4. Copy Client ID and Client Secret to `.env.local`
+### **Session Management**
 
-#### Google
+- JWT-based sessions for optimal performance
+- Secure token signing and encryption
+- Automatic session refresh
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Enable Google+ API
-4. Create OAuth 2.0 Client IDs
-5. Set Authorized redirect URI to: `http://localhost:3000/api/auth/callback/google`
-6. Copy Client ID and Client Secret to `.env.local`
+For detailed setup instructions, see [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 ├── src/
 │   ├── app/
-│   │   ├── api/auth/[...auth]/route.js    # Auth.js API route
-│   │   ├── globals.css                    # Global styles
-│   │   ├── layout.js                      # Root layout
-│   │   └── page.js                        # Home page with auth
-│   └── auth.js                            # Auth.js configuration
-├── middleware.js                          # Auth.js middleware
-├── .editorconfig                          # Editor configuration
-├── .prettierrc                            # Prettier configuration
-├── eslint.config.mjs                      # ESLint configuration
-├── tsconfig.json                          # TypeScript configuration
-└── tailwind.config.js                     # Tailwind CSS configuration
+│   │   ├── api/auth/[...nextauth]/route.js  # NextAuth.js API route
+│   │   ├── auth/
+│   │   │   ├── signin/page.js               # Sign in page
+│   │   │   ├── signup/page.js               # Sign up page
+│   │   │   └── error/page.js                # Auth error page
+│   │   ├── globals.css                      # Global styles
+│   │   ├── layout.js                        # Root layout
+│   │   └── page.js                          # Protected home page
+│   ├── components/
+│   │   ├── SignInForm.js                    # Sign in form component
+│   │   └── SignUpForm.js                    # Sign up form component
+│   └── lib/
+│       ├── auth.js                          # NextAuth.js configuration
+│       ├── auth-actions.js                  # Authentication server actions
+│       ├── user-service.js                  # User management functions
+│       └── prisma.ts                        # Prisma client configuration
+├── prisma/
+│   └── schema.prisma                        # Database schema
+├── docs/
+│   ├── AUTHENTICATION.md                    # Authentication documentation
+│   └── .github/                             # GitHub-specific docs
+├── middleware.js                            # NextAuth.js middleware
+└── [config files...]                       # Various configuration files
 ```
 
 ## Development Tools

@@ -56,39 +56,21 @@ providers.push(
       },
     },
     async authorize(credentials) {
-      console.log(
-        "🔍 AUTHORIZE: Starting authentication for:",
-        credentials?.email
-      )
-
       if (!credentials?.email || !credentials?.password) {
-        console.log("❌ AUTHORIZE: Missing credentials")
         return null
       }
 
       try {
         // Query the database for the user
-        console.log(
-          "🔍 AUTHORIZE: Querying database for user:",
-          credentials.email
-        )
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email,
           },
         })
 
-        if (!user) {
-          console.log("❌ AUTHORIZE: User not found in database")
+        if (!user || !user.password) {
           return null
         }
-
-        if (!user.password) {
-          console.log("❌ AUTHORIZE: User exists but has no password")
-          return null
-        }
-
-        console.log("✅ AUTHORIZE: User found, verifying password...")
 
         // Verify password with bcrypt
         const isValidPassword = await bcryptjs.compare(
@@ -97,11 +79,8 @@ providers.push(
         )
 
         if (!isValidPassword) {
-          console.log("❌ AUTHORIZE: Password verification failed")
           return null
         }
-
-        console.log("✅ AUTHORIZE: Password verified, returning user object")
 
         // Return user object (password excluded for security)
         return {
@@ -111,7 +90,9 @@ providers.push(
           image: user.image,
         }
       } catch (error) {
-        console.error("💥 AUTHORIZE: Database error:", error)
+        if (process.env.NODE_ENV === "development") {
+          console.error("Authentication error:", error)
+        }
         return null
       }
     },
@@ -127,16 +108,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ user, account }) {
-      console.log("🔍 SIGNIN CALLBACK: Called with:", {
-        user: user ? { id: user.id, email: user.email } : null,
-        account: account
-          ? { provider: account.provider, type: account.type }
-          : null,
-      })
-
       // For credentials provider, create account record manually
       if (account?.provider === "credentials" && user?.id) {
-        console.log("🔍 SIGNIN CALLBACK: Processing credentials provider")
         try {
           // Check if account already exists
           const existingAccount = await prisma.account.findFirst({
@@ -146,10 +119,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             },
           })
 
-          if (existingAccount) {
-            console.log("✅ SIGNIN CALLBACK: Account already exists")
-          } else {
-            console.log("🔍 SIGNIN CALLBACK: Creating new account record")
+          // Create account record if it doesn't exist
+          if (!existingAccount) {
             await prisma.account.create({
               data: {
                 userId: user.id,
@@ -158,15 +129,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 providerAccountId: user.id,
               },
             })
-            console.log("✅ SIGNIN CALLBACK: Account created successfully")
           }
         } catch (error) {
-          console.error("💥 SIGNIN CALLBACK: Error with account:", error)
+          if (process.env.NODE_ENV === "development") {
+            console.error("Error creating credentials account:", error)
+          }
           return false
         }
       }
 
-      console.log("✅ SIGNIN CALLBACK: Returning true")
       return true
     },
     async redirect({ url, baseUrl }) {
@@ -174,43 +145,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (new URL(url).origin === baseUrl) return url
       return baseUrl
     },
-    async jwt({ token, user, account }) {
-      console.log("🔍 JWT CALLBACK: Called with:", {
-        token: token ? { sub: token.sub, email: token.email } : null,
-        user: user ? { id: user.id, email: user.email } : null,
-        account: account ? { provider: account.provider } : null,
-      })
-
+    async jwt({ token, user }) {
       // Store user info in JWT token during sign in
       if (user) {
         token.id = user.id
         token.email = user.email
         token.name = user.name
         token.image = user.image
-        console.log("✅ JWT CALLBACK: Added user data to token")
       }
-
-      console.log("✅ JWT CALLBACK: Returning token")
       return token
     },
     async session({ session, token }) {
-      console.log("🔍 SESSION CALLBACK: Called with:", {
-        session: session ? { user: session.user } : null,
-        token: token ? { id: token.id, email: token.email } : null,
-      })
-
       // Get user info from JWT token
       if (token) {
         session.user.id = token.id
         session.user.email = token.email
         session.user.name = token.name
         session.user.image = token.image
-        console.log(
-          "✅ SESSION CALLBACK: Added user data from token to session"
-        )
       }
-
-      console.log("✅ SESSION CALLBACK: Returning session:", session)
       return session
     },
   },

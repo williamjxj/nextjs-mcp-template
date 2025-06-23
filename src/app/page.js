@@ -4,14 +4,10 @@ import { redirect } from "next/navigation"
 
 export default async function Home() {
   const session = await auth()
-  console.log("🔍 HOME PAGE: Session check result:", session)
 
   // Redirect to sign-in page if not authenticated
   if (!session?.user) {
-    console.log("❌ HOME PAGE: No session found, redirecting to signin")
     redirect("/auth/signin")
-  } else {
-    console.log("✅ HOME PAGE: User found in session, showing home page")
   }
 
   return (
