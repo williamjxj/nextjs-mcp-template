@@ -1,7 +1,7 @@
 "use server"
 
 import bcryptjs from "bcryptjs"
-import { prisma } from "./prisma"
+import { prisma } from "./prisma.ts"
 
 /**
  * Create a new user with hashed password

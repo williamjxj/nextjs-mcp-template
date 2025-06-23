@@ -13,8 +13,13 @@ import { redirect } from "next/navigation"
 export default async function SignInPage({ searchParams }) {
   // If already signed in, redirect to home
   const session = await auth()
+  console.log("🔍 SIGNIN PAGE: Session check result:", session)
+
   if (session?.user) {
+    console.log("✅ SIGNIN PAGE: User found in session, redirecting to home")
     redirect("/")
+  } else {
+    console.log("❌ SIGNIN PAGE: No session found, staying on signin page")
   }
 
   const resolvedSearchParams = await searchParams

@@ -79,7 +79,7 @@ Created `src/lib/user-service.js` with:
 
 ```bash
 # Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:54322/mynextapp-template?schema=public"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/mynextapp-template?schema=public"
 
 # Auth.js
 AUTH_SECRET="your-super-secret-auth-secret-key"

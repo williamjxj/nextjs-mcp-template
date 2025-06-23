@@ -34,7 +34,14 @@ use context7
 
 **Documentation:** See `auth-credentials-setup.md` for detailed setup instructions.
 
-### 4. supabase adapter
+### 4. add prisma
+
+```bash
+$ createdb -h localhost -U postgres mynextapp-template
+$ npx prisma generate
+$ npx primsa db push
+$ npx prisma studio
+```
 
 ### 5. vercel deployment
 

@@ -5,7 +5,7 @@ import Credentials from "next-auth/providers/credentials"
 import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id"
-import { prisma } from "./prisma"
+import { prisma } from "./prisma.ts"
 
 // Conditionally add providers based on available credentials
 const providers = []
@@ -56,33 +56,39 @@ providers.push(
       },
     },
     async authorize(credentials) {
+      console.log(
+        "🔍 AUTHORIZE: Starting authentication for:",
+        credentials?.email
+      )
+
       if (!credentials?.email || !credentials?.password) {
+        console.log("❌ AUTHORIZE: Missing credentials")
         return null
       }
 
       try {
-        // Check for demo credentials first
-        if (
-          credentials.email === process.env.DEMO_USER_EMAIL &&
-          credentials.password === process.env.DEMO_USER_PASSWORD
-        ) {
-          return {
-            id: "demo-user",
-            email: credentials.email,
-            name: "Demo User",
-          }
-        }
-
         // Query the database for the user
+        console.log(
+          "🔍 AUTHORIZE: Querying database for user:",
+          credentials.email
+        )
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email,
           },
         })
 
-        if (!user || !user.password) {
+        if (!user) {
+          console.log("❌ AUTHORIZE: User not found in database")
           return null
         }
+
+        if (!user.password) {
+          console.log("❌ AUTHORIZE: User exists but has no password")
+          return null
+        }
+
+        console.log("✅ AUTHORIZE: User found, verifying password...")
 
         // Verify password with bcrypt
         const isValidPassword = await bcryptjs.compare(
@@ -91,8 +97,11 @@ providers.push(
         )
 
         if (!isValidPassword) {
+          console.log("❌ AUTHORIZE: Password verification failed")
           return null
         }
+
+        console.log("✅ AUTHORIZE: Password verified, returning user object")
 
         // Return user object (password excluded for security)
         return {
@@ -102,10 +111,7 @@ providers.push(
           image: user.image,
         }
       } catch (error) {
-        // Log authentication error for debugging
-        if (process.env.NODE_ENV === "development") {
-          console.error("Authentication error:", error)
-        }
+        console.error("💥 AUTHORIZE: Database error:", error)
         return null
       }
     },
@@ -120,34 +126,96 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: "/auth/error",
   },
   callbacks: {
-    authorized: async ({ auth }) => {
-      // Logged in users are authenticated, otherwise redirect to login page
-      return !!auth
-    },
     async signIn({ user, account }) {
-      // Allow OAuth providers and verified credentials
-      if (account?.provider !== "credentials") {
-        return true
+      console.log("🔍 SIGNIN CALLBACK: Called with:", {
+        user: user ? { id: user.id, email: user.email } : null,
+        account: account
+          ? { provider: account.provider, type: account.type }
+          : null,
+      })
+
+      // For credentials provider, create account record manually
+      if (account?.provider === "credentials" && user?.id) {
+        console.log("🔍 SIGNIN CALLBACK: Processing credentials provider")
+        try {
+          // Check if account already exists
+          const existingAccount = await prisma.account.findFirst({
+            where: {
+              userId: user.id,
+              provider: "credentials",
+            },
+          })
+
+          if (existingAccount) {
+            console.log("✅ SIGNIN CALLBACK: Account already exists")
+          } else {
+            console.log("🔍 SIGNIN CALLBACK: Creating new account record")
+            await prisma.account.create({
+              data: {
+                userId: user.id,
+                type: "credentials",
+                provider: "credentials",
+                providerAccountId: user.id,
+              },
+            })
+            console.log("✅ SIGNIN CALLBACK: Account created successfully")
+          }
+        } catch (error) {
+          console.error("💥 SIGNIN CALLBACK: Error with account:", error)
+          return false
+        }
       }
-      // For credentials, user is already verified in authorize function
-      return !!user
+
+      console.log("✅ SIGNIN CALLBACK: Returning true")
+      return true
     },
     async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
       if (url.startsWith("/")) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
+      if (new URL(url).origin === baseUrl) return url
       return baseUrl
     },
-    async session({ session, user }) {
-      // Include user id in session
+    async jwt({ token, user, account }) {
+      console.log("🔍 JWT CALLBACK: Called with:", {
+        token: token ? { sub: token.sub, email: token.email } : null,
+        user: user ? { id: user.id, email: user.email } : null,
+        account: account ? { provider: account.provider } : null,
+      })
+
+      // Store user info in JWT token during sign in
       if (user) {
-        session.user.id = user.id
+        token.id = user.id
+        token.email = user.email
+        token.name = user.name
+        token.image = user.image
+        console.log("✅ JWT CALLBACK: Added user data to token")
       }
+
+      console.log("✅ JWT CALLBACK: Returning token")
+      return token
+    },
+    async session({ session, token }) {
+      console.log("🔍 SESSION CALLBACK: Called with:", {
+        session: session ? { user: session.user } : null,
+        token: token ? { id: token.id, email: token.email } : null,
+      })
+
+      // Get user info from JWT token
+      if (token) {
+        session.user.id = token.id
+        session.user.email = token.email
+        session.user.name = token.name
+        session.user.image = token.image
+        console.log(
+          "✅ SESSION CALLBACK: Added user data from token to session"
+        )
+      }
+
+      console.log("✅ SESSION CALLBACK: Returning session:", session)
       return session
     },
   },
   session: {
-    strategy: "database",
+    strategy: "jwt", // Switch to JWT to fix session issues
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 })

@@ -104,13 +104,6 @@ export default function SignInForm({ credentialsSignIn, oauthActions, error }) {
           </button>
         </form>
 
-        {/* Demo Credentials */}
-        <div className="mt-4 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg">
-          <p className="text-xs text-yellow-800 text-center font-medium">
-            <span className="font-bold">Demo:</span> demo@example.com / demo123
-          </p>
-        </div>
-
         {/* Sign Up Link */}
         <div className="text-center pt-2">
           <p className="text-sm text-gray-600">
