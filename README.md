@@ -57,7 +57,7 @@ A modern Next.js template with complete authentication system including email/pa
    npm run dev
    ```
 
-5. **Open [http://localhost:8000](http://localhost:8000)** in your browser
+5. **Open [http://localhost:3000](http://localhost:3000)** in your browser
 
 ## Available Scripts
 

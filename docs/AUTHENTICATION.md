@@ -20,7 +20,7 @@ Create a `.env.local` file with the following variables:
 # Authentication
 AUTH_SECRET="your-super-secret-key-at-least-32-characters-long"
 AUTH_TRUST_HOST=true
-NEXTAUTH_URL=http://localhost:8000
+NEXTAUTH_URL=http://localhost:3000
 
 # Database
 DATABASE_URL="postgresql://username:password@localhost:5432/database_name?schema=public"
@@ -56,11 +56,13 @@ npm run dev
 ## 📋 How It Works
 
 ### Email/Password Flow
+
 1. **Sign Up**: User creates account → Password hashed with bcrypt → User stored in database
 2. **Sign In**: Credentials verified → JWT token created → User authenticated
 3. **Account Linking**: Automatic account record creation for database consistency
 
 ### OAuth Flow
+
 1. **Provider Sign In**: User redirects to OAuth provider → Returns with user data
 2. **Account Creation**: User and account records created automatically
 3. **Session Management**: JWT token created with user information
@@ -99,6 +101,7 @@ The authentication system uses these Prisma models:
 ## 🔄 Session Strategy
 
 This application uses **JWT sessions** for optimal performance and reliability:
+
 - Credentials authentication uses JWT tokens
 - OAuth providers also use JWT for consistency
 - Database records maintained for user management
